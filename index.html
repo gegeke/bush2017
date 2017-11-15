@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>BUSH 2017</title>
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous"> -->
+  <link rel="stylesheet" href="css/framework7.ios.min.css">
+  <link rel="stylesheet" href="css/framework7.ios.colors.min.css">
+  <!-- <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"> -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!-- <div id="googleMapBase" style="position:static;top:-50px;"></div> -->
+  <div id="app">
+    <!-- Statusbar -->
+    <f7-statusbar></f7-statusbar>
+
+    <!-- Left Panel -->
+    <!-- <f7-panel left reveal layout="dark"> -->
+    <f7-panel left reveal>
+      <f7-view id="left-panel-view" navbar-through :dynamic-navbar="true">
+        <f7-navbar v-if="$theme.ios" sliding><span class="panel-logo"><img src="img/logo-red.svg"></span></f7-navbar>
+        <f7-pages>
+          <f7-page>
+            <f7-navbar v-if="$theme.ios" title="Left Panel" sliding></f7-navbar>
+            <f7-list class="menu-list">
+              <f7-list-item link="/" title="SCHEDULE" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/favorites/" title="MY PROGRAM" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/concerts/" title="CONCERTS" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/artists-a-z/" title="ARTISTS (A-Z)" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/conferences/" title="CONFERENCES" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/speakers/" title="SPEAKERS (A-Z)" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/venues/" title="VENUES" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+              <f7-list-item link="/info/" title="INFO" link-view="#main-view" link-close-panel class="Text-Style-10"></f7-list-item>
+            </f7-list>
+            <div class="by-spring">
+              <img src="img/by-spring.svg">
+            </div>
+          </f7-page>
+        </f7-pages>
+      </f7-view>
+    </f7-panel>
+
+    <!-- Main Views -->
+    <f7-views>
+      <f7-view id="main-view" navbar-through :dynamic-navbar="true" main>
+        <!-- iOS Theme Navbar -->
+        <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+          <f7-nav-left>
+            <f7-link open-panel="left">
+              <div id="nav-icon">
+                <span></span>
+                <span></span>
+              </div>
+            </f7-link>
+          </f7-nav-left>
+          <f7-nav-center sliding>
+            <img src="img/logo-white.svg">
+          </f7-nav-center>
+          <f7-nav-right>
+            <div class="star-animation">
+              <img src="img/star-white.svg">
+            </div>
+            <f7-link href="/favorites/" class="to-favorites-page">
+              <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+              <img v-else class="full-star" src="img/star-white-full.svg">
+            </f7-link>
+          </f7-nav-right>
+          <f7-subnavbar sliding class="bg-white event-filter">
+            <f7-buttons class="filter-row days">
+              <f7-button tab-link="#day15" active><span class="daysMonth">Nov<br /><span class="daysDay">15</span></span></f7-button>
+              <f7-button tab-link="#day16"><span class="daysMonth">Nov<br /><span class="daysDay">16</span></span></f7-button>
+              <f7-button tab-link="#day17"><span class="daysMonth">Nov<br /><span class="daysDay">17</span></span></f7-button>
+            </f7-buttons>
+            <div style="width:100%;"></div>
+            <f7-buttons class="filter-row params">
+              <f7-button link="#" class="Text-Style-2 dropbtn" @click="openTypeDropdown">ANY TYPE<img src="img/dropdown-triangle-red.svg"></f7-button>
+                <div id="myDropdown" class="dropdown-content">
+                  <a href="#" @click="filterType( 0 )">ANY TYPE</a>
+                  <a href="#" @click="filterType( 1 )">CONCERT</a>
+                  <a href="#" @click="filterType( 2 )">CONFERENCE</a>
+                </div>
+              <f7-button data-action="order" data-type="time" class="Text-Style-2" @click="orderEvents( 'time' )">BY TIME</f7-button>
+              <f7-button data-action="order" data-type="venue" class="Text-Style-2" @click="orderEvents( 'venue' )">BY VENUE</f7-button>
+            </f7-buttons>
+          </f7-subnavbar>
+        </f7-navbar>
+        <!-- Pages -->
+        <f7-pages>
+          <f7-page class="event-list-page">
+            <!-- Material Theme Navbar -->
+            <f7-navbar v-if="$theme.material" sliding>
+              <f7-nav-left>
+                <f7-link icon="icon-bars" open-panel="left"></f7-link>
+              </f7-nav-left>
+              <f7-nav-center sliding>BUSH 2017</f7-nav-center>
+              <f7-nav-right>
+                <div class="star-animation">
+                  <img src="img/star-white.svg">
+                </div>
+                <f7-link href="/favorites/" class="to-favorites-page"><img src="img/star-white.svg"></f7-link>
+              </f7-nav-right>
+            </f7-navbar>
+            <div class="tabs">
+              <div id="day15" class="tab active">
+                <transition name="fade">
+                <f7-list media-list v-if="store.state.eventsshow" class="main-list">
+                  <li
+                  v-for="event in store.getters.getFirstDayEvents"
+                  v-bind:link="'/event-route/event/' + event.id + ''"
+                  v-show="!event.filtered"
+                  >
+                    <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+                      <div class="item-content">
+                        <div class="item-media thumb-img">
+                          <!-- <span v-html="event.liveNow"></span> -->
+                          <img v-bind:src="event.thumb" width="65" height="65">
+                          <div v-if="event.liveNow" class="liveBadge">NOW</div>
+                        </div>
+                        <div class="item-inner">
+                          <div class="item-title-row">
+                            <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                            <!-- <div class="item-after">Read more</div> -->
+                          </div>
+                          <!-- <span v-html="event.type"></span> -->
+                          <div class="item-subtitle list-block-content-font">Nov.15 / <span v-html="event.time.start"></span></div>
+                          <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+                        </div>
+                      </div>
+                      <div class="media-list-divider"><div></div></div>
+                    </a>
+                    <a href="#" class="list-item-star" v-if="!event.favorited" @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id" src="img/star-gray.svg"></a>
+                    <a href="#" class="list-item-star" v-else @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id + ' favorited'" src="img/star-red.svg"></a>
+                  </li>
+                </f7-list>
+                </transition>
+              </div>
+
+              <div id="day16" class="tab">
+                <transition name="fade">
+                <f7-list media-list v-if="store.state.eventsshow" class="main-list">
+                  <li
+                  v-for="event in store.getters.getSecondDayEvents"
+                  v-bind:link="'/event-route/event/' + event.id + ''"
+                  v-show="!event.filtered"
+                  >
+                  <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+                    <div class="item-content">
+                      <div class="item-media">
+                        <img v-bind:src="event.thumb" width="65" height="65">
+                      </div>
+                      <div class="item-inner">
+                        <div class="item-title-row">
+                          <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                          <!-- <div class="item-after">Read more</div> -->
+                        </div>
+                        <div class="item-subtitle list-block-content-font">Nov.16 / <span v-html="event.time.start"></span></div>
+                        <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+                      </div>
+                    </div>
+                    <div class="media-list-divider"><div></div></div>
+                    </a>
+                    <a href="#" class="list-item-star" v-if="!event.favorited" @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id" src="img/star-gray.svg"></a>
+                    <a href="#" class="list-item-star" v-else @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id + ' favorited'" src="img/star-red.svg"></a>
+                  </li>
+                </f7-list>
+                </transition>
+              </div>
+
+              <div id="day17" class="tab">
+                <transition name="fade">
+                <f7-list media-list v-if="store.state.eventsshow" class="main-list">
+                  <li
+                  v-for="event in store.getters.getThirdDayEvents"
+                  v-bind:link="'/event-route/event/' + event.id + ''"
+                  v-show="!event.filtered"
+                  >
+                    <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+                      <div class="item-content">
+                        <div class="item-media">
+                          <img v-bind:src="event.thumb" width="65" height="65">
+                        </div>
+                        <div class="item-inner">
+                          <div class="item-title-row">
+                            <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                            <!-- <div class="item-after">Read more</div> -->
+                          </div>
+                          <div class="item-subtitle list-block-content-font">Nov.17 / <span v-html="event.time.start"></span></div>
+                          <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+                        </div>
+                      </div>
+                      <div class="media-list-divider"><div></div></div>
+                    </a>
+                    <a href="#" class="list-item-star" v-if="!event.favorited" @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id" src="img/star-gray.svg"></a>
+                    <a href="#" class="list-item-star" v-else @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id + ' favorited'" src="img/star-red.svg"></a>
+                  </li>
+                </f7-list>
+                </transition>
+              </div>
+
+
+
+            </div>
+
+            <f7-block>
+              <f7-grid class="popup-bar-container">
+                <f7-col width="100">
+                  <f7-button open-popup="#popup" class="popup-bar bg-gradient red-to-magenta"><div class="open-popup-sign"></div></f7-button>
+                </f7-col>
+              </f7-grid>
+
+            </f7-block>
+
+          </f7-page>
+        </f7-pages>
+      </f7-view>
+    </f7-views>
+
+    <!-- Popup -->
+    <f7-popup id="popup">
+      <f7-view navbar-fixed>
+        <f7-pages>
+          <f7-page>
+            <f7-navbar>
+              <div style="width:100%;">
+                <f7-grid>
+                  <f7-col width="100">
+                    <f7-button close-popup class="popup-bar bg-gradient red-to-magenta"><div class="open-popup-sign"></div></f7-button>
+                  </f7-col>
+                </f7-grid>
+              </div>
+              <div class="popup-title">
+                VOTE ON THE ONGOING EVENTS
+              </div>
+            </f7-navbar>
+              <f7-list media-list v-if="store.state.eventsshow">
+                <li
+                v-for="event in store.getters.getAllEvents"
+                v-bind:link="'/event-route/event/' + event.id + ''"
+                v-if="event.canVote"
+                >
+                  <!-- <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link"> -->
+                    <div class="item-content">
+                      <div class="item-inner">
+                        <div class="item-title-row">
+                          <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                          <!-- <div class="item-after">Read more</div> -->
+                        </div>
+                        <div class="item-subtitle list-block-content-font">Nov.17 / <span v-html="event.time.start"></span></div>
+                        <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+                        <span class="voteCounter" v-show="event.voted" v-html="'VOTES: ' + event.voteCount"></span>
+                      </div>
+                      <div class="item-inner voteThumbContainer">
+                        <a href="#" @click="voteUp( event.id )" class="voteThumb notVoted thumbsUp">
+                          <img v-if="!event.voted" src="img/thumb-up-gray-empty.svg">
+                          <img v-else-if="event.voted == 'Y'" src="img/thumb-up-red-full.svg">
+                          <img v-else src="img/thumb-up-gray-empty.svg">
+                        </a>
+                        <a href="#" @click="voteDown( event.id )" class="voteThumb notVoted thumbsDown">
+                          <img v-if="!event.voted" src="img/thumb-up-gray-empty.svg">
+                          <img v-else-if="event.voted == 'N'" src="img/thumb-up-red-full.svg">
+                          <img v-else src="img/thumb-up-gray-empty.svg">
+                        </a>
+                      </div>
+                    </div>
+                    <div class="media-list-divider"><div></div></div>
+                  <!-- </a> -->
+                </li>
+              </f7-list>
+          </f7-page>
+        </f7-pages>
+      </f7-view>
+    </f7-popup>
+
+  </div>
+
+  <!-- About Page Template -->
+  <template id="page-about">
+    <f7-page>
+      <!-- <f7-navbar title="About" back-link="Back" sliding></f7-navbar> -->
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" back>
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page"><img src="img/star-white.svg"></f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-block inner>
+        <p>Here is About page!</p>
+        <p>You can go <f7-link back>back</f7-link>.</p>
+        <p>Mauris posuere sit amet metus id venenatis. Ut ante dolor, tempor nec commodo rutrum, varius at sem. Nullam ac nisi non neque ornare pretium. Nulla mauris mauris, consequat et elementum sit amet, egestas sed orci. In hac habitasse platea dictumst.</p>
+        <p>Fusce eros lectus, accumsan eget mi vel, iaculis tincidunt felis. Nulla tincidunt pharetra sagittis. Fusce in felis eros. Nulla sit amet aliquam lorem, et gravida ipsum. Mauris consectetur nisl non sollicitudin tristique. Praesent vitae metus ac quam rhoncus mattis vel et nisi. Aenean aliquet, felis quis dignissim iaculis, lectus quam tincidunt ligula, et venenatis turpis risus sed lorem. Morbi eu metus elit. Ut vel diam dolor.</p>
+      </f7-block>
+    </f7-page>
+  </template>
+
+  <!-- Info Page Template -->
+  <template id="page-info">
+    <f7-page>
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-block inner style="padding-top: 15px;">
+        <p style="text-align: center;">Budapest Showcase Hub
+E-mail: <a href="mailto:bush@budapestshowcasehub.com">bush@budapestshowcasehub.com</a>
+or
+Visit our official website for additional information
+<a href="http://budapestshowcasehub.com">http://budapestshowcasehub.com</a></p>
+<p>&nbsp;</p>
+<p style="text-align: center;">Application designed for
+Budapest Showcase Hub</p>
+<p>&nbsp;</p>
+<p style="text-align: center;">&copy; Spring Works Ltd. The application software is protected by copyright law and its use requires a license from Spring Works Ltd. All rights reserved.</p>
+<p>&nbsp;</p>
+<p style="text-align: center;">The content of the application, including without limitation the images, text and the rights in all trademarks appearing on this application are held by their respective owners and cannot be exploited without the prior written agreement of their owner.</p>
+      </f7-block>
+    </f7-page>
+  </template>
+
+  <!-- Form Page Template -->
+  <template id="page-form"></template>
+
+  <!-- Dynamic Routing Page Template -->
+  <template id="page-dynamic-routing">
+    <!-- <f7-page>
+      <f7-navbar title="Dynamic Route" back-link="Back" sliding></f7-navbar>
+      <f7-block inner>
+        <ul>
+          <li><b>Url:</b> {{$route.url}}</li>
+          <li><b>Path:</b> {{$route.path}}</li>
+          <li><b>Hash:</b> {{$route.hash}}</li>
+          <li><b>Params:</b>
+            <ul>
+              <li v-for="(value, key) in $route.params"><b>{{key}}:</b> {{value}}</li>
+            </ul>
+          </li>
+          <li><b>Query:</b>
+            <ul>
+              <li v-for="(value, key) in $route.query"><b>{{key}}:</b> {{value}}</li>
+            </ul>
+          </li>
+          <li><b>Route:</b> {{$route.route}}</li>
+        </ul>
+      </f7-block>
+      <f7-block inner>
+        <f7-link @click="$router.back()">Go back via Router API</f7-link>
+      </f7-block>
+    </f7-page> -->
+  </template>
+
+
+
+
+
+
+
+
+  <!-- Event Routing Page Template -->
+  <template id="page-event-routing">
+    <f7-page class="single-event-page">
+
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-block inner>
+        <div v-if="getSingleEventById( $route.params.postId ).type === 'concert'" class="head-img" v-bind:style="{ 'background-image': 'url(' + getSingleEventById( $route.params.postId ).image + ')' }">
+          <img v-bind:src="getSingleEventById( $route.params.postId ).image">
+        </div>
+        <div class="single-top">
+          <div class="single-top-row">
+            <div class="single-title" v-html="getSingleEventById( $route.params.postId ).title"></div>
+            <div class="single-favorite" @click="toFavorites( $route.params.postId )">
+              <img v-if="!getSingleEventById( $route.params.postId ).favorited" src="img/star-circle-gray.svg">
+              <img v-else src="img/star-circle-red.svg">
+            </div>
+          </div>
+          <div class="single-top-row">
+            <div class="Text-Style-10" v-html="'Nov.' + getSingleEventById( $route.params.postId ).date + ' / ' + getSingleEventById( $route.params.postId ).time.start + '<br />' + getSingleEventById( $route.params.postId ).venue"></div>
+            <!-- <div class="single-title" v-html="getSingleEventById( $route.params.postId )"></div> -->
+            <a v-bind:href="'/venue-route/venue/' + getSingleEventById( $route.params.postId ).venueId + ''" class="single-favorite">
+              <img src="img/marker-circle-red.svg">
+            </a>
+          </div>
+        </div>
+        <div class="single-bottom">
+          <div v-if="getSingleEventById( $route.params.postId ).type === 'concert'" class="single-content-title" v-html="'ABOUT ' + getSingleEventById( $route.params.postId ).title"></div>
+          <div v-else class="single-content-title">SPEAKERS</div>
+
+          <f7-list media-list v-if="store.state.eventsshow">
+            <li
+            v-for="event in getEventSpeakers( $route.params.postId )"
+            v-bind:link="'/speaker-route/speaker/' + event.id + ''"
+            >
+              <a v-bind:href="'/speaker-route/speaker/' + event.id + ''" class="item-link">
+                <div class="item-content">
+                  <div class="item-media">
+                    <img v-bind:src="event.thumb" width="65" height="65">
+                  </div>
+                  <div class="item-inner">
+                    <div class="item-title-row">
+                      <div class="item-title list-block-title-font"><span v-html="event.name"></span></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="media-list-divider"><div></div></div>
+              </a>
+            </li>
+          </f7-list>
+
+
+          <div class="single-content" v-html="getSingleEventById( $route.params.postId ).content"></div>
+        </div>
+      </f7-block>
+    </f7-page>
+  </template>
+
+
+
+  <!-- Speaker Routing Page Template -->
+  <template id="page-speaker-routing">
+    <f7-page class="single-speaker-page">
+
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+
+      <f7-block inner>
+        <div class="head-img" v-bind:style="{ 'background-image': 'url(' + getSingleEventById( $route.params.postId ).image + ')' }">
+          <img v-bind:src="getSingleEventById( $route.params.postId ).image">
+        </div>
+        <div class="single-top">
+          <div class="single-title" v-html="getSingleEventById( $route.params.postId ).name"></div>
+        </div>
+        <div class="single-bottom">
+          <div class="single-content" v-html="getSingleEventById( $route.params.postId ).content"></div>
+        </div>
+      </f7-block>
+    </f7-page>
+  </template>
+
+
+
+
+
+
+
+
+  <!-- Artists A-Z Page Template -->
+  <template id="page-artists-a-z">
+    <f7-page class="single-event-page">
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+        <f7-list media-list v-if="store.state.eventsshow">
+          <li
+          v-for="event in store.getters.getAllEvents"
+          v-bind:link="'/event-route/event/' + event.id + ''"
+          v-if="event.type === 'concert'"
+          >
+            <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+              <div class="item-content">
+                <div class="item-media">
+                  <img v-bind:src="event.thumb" width="65" height="65">
+                </div>
+                <div class="item-inner">
+                  <div class="item-title-row">
+                    <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="media-list-divider"><div></div></div>
+            </a>
+          </li>
+        </f7-list>
+    </f7-page>
+  </template>
+
+
+
+  <!-- Concerts Page Template -->
+  <template id="page-concerts">
+    <f7-page class="concert-event-page">
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-list media-list v-if="store.state.eventsshow">
+        <li
+        v-for="event in store.getters.getAllEventsByTime"
+        v-bind:link="'/event-route/event/' + event.id + ''"
+        v-if="event.type === 'concert'"
+        >
+          <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+            <div class="item-content">
+              <div class="item-media">
+                <img v-bind:src="event.thumb" width="65" height="65">
+              </div>
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                </div>
+                <div class="item-subtitle list-block-content-font">Nov.{{event.date}} / <span v-html="event.time.start"></span></div>
+                <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+              </div>
+            </div>
+            <div class="media-list-divider"><div></div></div>
+          </a>
+          <a href="#" class="list-item-star" v-if="!event.favorited" @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id" src="img/star-gray.svg"></a>
+          <a href="#" class="list-item-star" v-else @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id + ' favorited'" src="img/star-red.svg"></a>
+        </li>
+      </f7-list>
+    </f7-page>
+  </template>
+
+
+  <!-- Conferences Page Template -->
+  <template id="page-conferences">
+    <f7-page class="conferences-event-page">
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-list media-list v-if="store.state.eventsshow">
+        <li
+        v-for="event in store.getters.getAllEventsByTime"
+        v-bind:link="'/event-route/event/' + event.id + ''"
+        v-if="event.type === 'conference'"
+        >
+          <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+            <div class="item-content">
+              <div class="item-media">
+                <img v-bind:src="event.thumb" width="65" height="65">
+              </div>
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                </div>
+                <div class="item-subtitle list-block-content-font">Nov.{{event.date}} / <span v-html="event.time.start"></span></div>
+                <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+              </div>
+            </div>
+            <div class="media-list-divider"><div></div></div>
+          </a>
+          <a href="#" class="list-item-star" v-if="!event.favorited" @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id" src="img/star-gray.svg"></a>
+          <a href="#" class="list-item-star" v-else @click="toFavorites( event.id )"><img v-bind:class="'star-' + event.id + ' favorited'" src="img/star-red.svg"></a>
+        </li>
+      </f7-list>
+    </f7-page>
+  </template>
+
+
+
+  <!-- My Program Page Template -->
+  <template id="page-favorites">
+    <f7-page class="class-page-favorites">
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <!-- <f7-link class="arrow-left" back> -->
+          <f7-link @click="$router.back()" class="arrow-left">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+      </f7-navbar>
+      <div v-if="store.state.favoriteList.length === 0" class="my-program-text">Tap on the stars beside events to create your own schedule!</div>
+      <f7-list media-list v-if="store.state.eventsshow">
+
+        <li
+        v-for="event in store.getters.getAllEvents"
+        v-bind:link="'/event-route/event/' + event.id + ''"
+        v-show="event.favorited"
+        >
+          <a v-bind:href="'/event-route/event/' + event.id + ''" class="item-link">
+            <div class="item-content">
+              <div class="item-media">
+                <img v-bind:src="event.thumb" width="65" height="65">
+              </div>
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title list-block-title-font"><span v-html="event.title"></span></div>
+                  <!-- <div class="item-after">Read more</div> -->
+                </div>
+                <div class="item-subtitle list-block-content-font">Nov.17 / <span v-html="event.time.start"></span></div>
+                <div class="item-text list-block-content-font"><span v-html="event.venue"></span></div>
+              </div>
+            </div>
+            <div class="media-list-divider"><div></div></div>
+          </a>
+          <a href="#" class="list-item-star" v-if="!event.favorited" @click="componentToFavorites( event.id )"><img v-bind:class="'star-' + event.id" src="img/star-gray.svg"></a>
+          <a href="#" class="list-item-star" v-else @click="componentToFavorites( event.id )"><img v-bind:class="'star-' + event.id + ' favorited'" src="img/star-red.svg"></a>
+        </li>
+      </f7-list>
+    </f7-page>
+  </template>
+
+
+  <!-- Speaker List Page Template -->
+  <template id="page-speakers">
+    <f7-page class="class-page-speakers">
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-list media-list v-if="store.state.eventsshow">
+        <li
+        v-for="event in store.getters.getAllSpeakers"
+        v-bind:link="'/speaker-route/speaker/' + event.id"
+        v-if="event.type === 'speaker'"
+        >
+          <a v-bind:href="'/speaker-route/speaker/' + event.id + ''" class="item-link">
+            <div class="item-content">
+              <div class="item-media">
+                <img v-bind:src="event.thumb" width="65" height="65">
+              </div>
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title list-block-title-font"><span v-html="event.name"></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="media-list-divider"><div></div></div>
+          </a>
+        </li>
+      </f7-list>
+    </f7-page>
+  </template>
+
+
+
+
+  <!-- Venue List Page Template -->
+  <template id="page-venues">
+    <f7-page class="class-page-venues">
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+      <f7-list media-list v-if="store.state.eventsshow">
+        <li
+        v-for="event in store.getters.getAllVenues"
+        v-bind:link="'/venue-route/venue/' + event.id"
+        v-if="event.id != ''"
+        >
+          <a v-bind:href="'/venue-route/venue/' + event.id + ''" class="item-link">
+            <div class="item-content">
+              <div class="item-media">
+                <img v-bind:src="event.thumb" width="65" height="65">
+              </div>
+              <div class="item-inner">
+                <div class="item-title-row">
+                  <div class="item-title list-block-title-font"><span v-html="event.name"></span></div>
+                </div>
+                <div class="item-subtitle list-block-content-font"><span v-html="event.address"></span></div>
+                <div class="item-text list-block-content-font"><span v-html="event.phone"></span></div>
+              </div>
+            </div>
+            <div class="media-list-divider"><div></div></div>
+          </a>
+        </li>
+      </f7-list>
+    </f7-page>
+  </template>
+
+
+  <!-- Venue Routing Page Template -->
+  <template id="page-venue-routing">
+    <f7-page class="single-venue-page">
+
+      <f7-navbar v-if="$theme.ios" class="bg-gradient red-to-magenta">
+        <f7-nav-left>
+          <f7-link class="arrow-left" @click="$router.back()">
+            <img src="img/arrow-left-white.svg">
+          </f7-link>
+        </f7-nav-left>
+        <f7-nav-center sliding><img src="img/logo-white.svg"></f7-nav-center>
+        <f7-nav-right>
+          <div class="star-animation">
+            <img src="img/star-white.svg">
+          </div>
+          <f7-link href="/favorites/" class="to-favorites-page">
+            <img v-if="store.state.favoriteList.length === 0" class="empty-star" src="img/star-white.svg">
+            <img v-else class="full-star" src="img/star-white-full.svg">
+          </f7-link>
+        </f7-nav-right>
+      </f7-navbar>
+
+      <f7-block inner>
+        <div class="head-img">
+          <div id="mapBounds" style="display:none;"></div>
+          <div id="map">
+            <span v-html="getSingleEventById( $route.params.postId ).map">
+          </div>
+        </div>
+        <div class="single-top venue">
+          <div class="single-title" v-html="getSingleEventById( $route.params.postId ).name"></div>
+        </div>
+        <div class="single-bottom">
+          <div class="single-content" v-html="getSingleEventById( $route.params.postId ).address"></div>
+          <div class="single-content" v-html="getSingleEventById( $route.params.postId ).phone"></div>
+          <div class="single-content" v-html="getSingleEventById( $route.params.postId ).website"></div>
+          <div class="single-content" v-html="getSingleEventById( $route.params.postId ).email"></div>
+        </div>
+      </f7-block>
+    </f7-page>
+  </template>
+
+
+  <script type="text/javascript" src="cordova.js"></script>
+  <script src="js/framework7.min.js"></script>
+  <script src="js/vuex.js"></script>
+  <script src="js/vue.min.js"></script>
+  <script src="js/vue-resource.min.js"></script>
+  <script src="js/framework7-vue.min.js"></script>
+  <script src="js/vendor/jquery-1.11.2.min.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+  <script src="js/vendor/underscore.min.js"></script>
+  <script src="js/vendor/gsap/TweenMax.min.js"></script>
+  <!--CDN link for  TweenMax-->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.20.2/TweenMax.min.js"></script> -->
+  <script src="js/vendor/gsap/jquery.gsap.min.js"></script>
+  <script src="js/vendor/gsap/utils/CSSTransform.min.js"></script>
+  <!-- <script src="js/vendor/gsap/plugins/DrawSVGPlugin.min.js"></script> -->
+  <!-- <script src="js/vendor/gsap/plugins/MorphSVGPlugin.min.js"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script> -->
+  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script> -->
+  <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCPj7BTPjlq7aeWy7LB7pXwLBcEb9gpls&v=3.29" async defer></script> -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDCPj7BTPjlq7aeWy7LB7pXwLBcEb9gpls"></script>
+  <script type="text/javascript" src="js/app.js"></script>
+  <script>
+  var timeLine = new TimelineMax( {} );
+  </script>
+</body>
+</html>
